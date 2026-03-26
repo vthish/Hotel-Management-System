@@ -24,22 +24,89 @@ public class CustomerTable {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(20, 20, 450, 200);
 
+        JButton updateBtn = new JButton("Update");
+        JButton deleteBtn = new JButton("Delete");
         JButton backBtn = new JButton("Back");
-        backBtn.setBounds(200, 230, 100, 30);
+
+        updateBtn.setBounds(50, 230, 100, 30);
+        deleteBtn.setBounds(180, 230, 100, 30);
+        backBtn.setBounds(310, 230, 100, 30);
 
         CustomerController controller = new CustomerController();
-        List<String[]> data = controller.getCustomers();
 
+        // LOAD DATA
+        List<String[]> data = controller.getCustomers();
         for (String[] row : data) {
             model.addRow(row);
         }
 
+        // UPDATE (WITH CANCEL FIX)
+        updateBtn.addActionListener(e -> {
+
+            int selectedRow = table.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame, "Select a row first");
+                return;
+            }
+
+            String id = model.getValueAt(selectedRow, 0).toString();
+
+            String name = JOptionPane.showInputDialog("Enter Name:", model.getValueAt(selectedRow, 1));
+            if (name == null) return;
+
+            String phone = JOptionPane.showInputDialog("Enter Phone:", model.getValueAt(selectedRow, 2));
+            if (phone == null) return;
+
+            String email = JOptionPane.showInputDialog("Enter Email:", model.getValueAt(selectedRow, 3));
+            if (email == null) return;
+
+            controller.updateCustomer(id, name, phone, email);
+
+            model.setValueAt(name, selectedRow, 1);
+            model.setValueAt(phone, selectedRow, 2);
+            model.setValueAt(email, selectedRow, 3);
+
+            JOptionPane.showMessageDialog(frame, "Updated Successfully");
+        });
+
+        // DELETE
+        deleteBtn.addActionListener(e -> {
+
+            int selectedRow = table.getSelectedRow();
+
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(frame, "Select a row first");
+                return;
+            }
+
+            String id = model.getValueAt(selectedRow, 0).toString();
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    frame,
+                    "Delete this customer?",
+                    "Confirm",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                controller.deleteCustomer(id);
+                model.removeRow(selectedRow);
+
+                JOptionPane.showMessageDialog(frame, "Deleted Successfully");
+            }
+        });
+
+        // BACK
         backBtn.addActionListener(e -> {
             frame.dispose();
             Dashboard.main(null);
         });
 
+        // ADD
         frame.add(scrollPane);
+        frame.add(updateBtn);
+        frame.add(deleteBtn);
         frame.add(backBtn);
 
         frame.setSize(500, 320);
