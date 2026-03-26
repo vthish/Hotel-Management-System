@@ -10,7 +10,7 @@ public class DBConnection {
             return DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/hotel_db",
                     "root",
-                    "password"
+                    ""
             );
         } catch (Exception e) {
             e.printStackTrace();
