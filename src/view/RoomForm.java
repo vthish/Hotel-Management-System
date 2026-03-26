@@ -1,131 +1,140 @@
 package view;
 
-import controller.RoomController;
-
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.event.*;
 
 public class RoomForm {
 
+    private JFrame frame;
+    private JTextField searchField;
+    private JTable roomTable;
+    private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
+
+    // Standalone run
     public static void main(String[] args) {
-
-        JFrame frame = new JFrame("Room Form");
-
-        frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-
-        // Labels
-        JLabel roomLabel = new JLabel("Room Number");
-        JLabel typeLabel = new JLabel("Type");
-        JLabel priceLabel = new JLabel("Price");
-        JLabel statusLabel = new JLabel("Status");
-
-        // Fields with placeholders
-        JTextField roomNumber = new JTextField("Ex: 101");
-        JTextField type = new JTextField("Ex: Deluxe");
-        JTextField price = new JTextField("Ex: 5000");
-
-        // Dropdown
-        String[] statuses = {"Available", "Booked", "Maintenance"};
-        JComboBox<String> status = new JComboBox<>(statuses);
-
-        JButton saveBtn = new JButton("Save");
-        JButton backBtn = new JButton("Back");
-
-        // Positions
-        roomLabel.setBounds(50, 10, 200, 20);
-        roomNumber.setBounds(50, 30, 200, 30);
-
-        typeLabel.setBounds(50, 70, 200, 20);
-        type.setBounds(50, 90, 200, 30);
-
-        priceLabel.setBounds(50, 130, 200, 20);
-        price.setBounds(50, 150, 200, 30);
-
-        statusLabel.setBounds(50, 190, 200, 20);
-        status.setBounds(50, 210, 200, 30);
-
-        saveBtn.setBounds(50, 260, 100, 30);
-        backBtn.setBounds(160, 260, 90, 30); // FIXED POSITION
-
-        // Placeholder setup
-        addPlaceholder(roomNumber, "Ex: 101");
-        addPlaceholder(type, "Ex: Deluxe");
-        addPlaceholder(price, "Ex: 5000");
-
-        RoomController controller = new RoomController();
-
-        // Enter navigation
-        roomNumber.addActionListener(e -> type.requestFocus());
-        type.addActionListener(e -> price.requestFocus());
-        price.addActionListener(e -> status.requestFocus());
-
-        // Save
-        saveBtn.addActionListener(e -> {
-
-            String roomNo = roomNumber.getText();
-            String typeText = type.getText();
-            String priceText = price.getText();
-
-            if (roomNo.equals("Ex: 101") || typeText.equals("Ex: Deluxe") || priceText.equals("Ex: 5000")) {
-                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
-                return;
-            }
-
-            controller.saveRoom(
-                    roomNo,
-                    typeText,
-                    priceText,
-                    status.getSelectedItem().toString()
-            );
-
-            JOptionPane.showMessageDialog(frame, "Saved Successfully");
-            frame.dispose();
-        });
-
-        // BACK BUTTON
-        backBtn.addActionListener(e -> {
-            frame.dispose();
-            Dashboard.main(null);
-        });
-
-        // Add components
-        frame.add(roomLabel);
-        frame.add(roomNumber);
-        frame.add(typeLabel);
-        frame.add(type);
-        frame.add(priceLabel);
-        frame.add(price);
-        frame.add(statusLabel);
-        frame.add(status);
-        frame.add(saveBtn);
-        frame.add(backBtn);
-
-        frame.setSize(300, 350); // little height increase
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        SwingUtilities.invokeLater(() -> new RoomForm());
     }
 
-    private static void addPlaceholder(JTextField field, String text) {
-        field.setForeground(Color.GRAY);
+    public RoomForm() {
+        createAndShowGUI();
+    }
 
-        field.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (field.getText().equals(text)) {
-                    field.setText("");
-                    field.setForeground(Color.BLACK);
-                }
-            }
+    private void createAndShowGUI() {
+        frame = new JFrame("Hotel Management System");
+        frame.setSize(800, 500);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-            public void focusLost(FocusEvent e) {
-                if (field.getText().isEmpty()) {
-                    field.setText(text);
-                    field.setForeground(Color.GRAY);
-                }
+        //Top panel with search
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.add(new JLabel("Search:"));
+        searchField = new JTextField(20);
+        topPanel.add(searchField);
+
+        //Table
+        String[] columns = {"Room No", "Type", "Price", "Status"};
+        tableModel = new DefaultTableModel(columns, 0);
+        roomTable = new JTable(tableModel);
+
+        //Sorter (IMPORTANT for search)
+        sorter = new TableRowSorter<>(tableModel);
+        roomTable.setRowSorter(sorter);
+
+        JScrollPane scrollPane = new JScrollPane(roomTable);
+
+        //Dummy data
+        addRoom("101", "Single", "1000", "Available");
+        addRoom("102", "Double", "1500", "Occupied");
+        addRoom("103", "Suite", "2500", "Available");
+
+        //Bottom buttons
+        JPanel bottomPanel = new JPanel();
+        JButton addBtn = new JButton("Add");
+        JButton updateBtn = new JButton("Update");
+        JButton deleteBtn = new JButton("Delete");
+
+        bottomPanel.add(addBtn);
+        bottomPanel.add(updateBtn);
+        bottomPanel.add(deleteBtn);
+
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
+
+        //Search feature (REAL FILTER)
+        searchField.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String query = searchField.getText();
+                filterTable(query);
             }
         });
+
+        //Add
+        addBtn.addActionListener(e -> {
+            String roomNo = JOptionPane.showInputDialog(frame, "Enter Room No:");
+            String type = JOptionPane.showInputDialog(frame, "Enter Room Type:");
+            String price = JOptionPane.showInputDialog(frame, "Enter Price:");
+            String status = JOptionPane.showInputDialog(frame, "Enter Status:");
+
+            if (roomNo != null && !roomNo.isEmpty()) {
+                addRoom(roomNo, type, price, status);
+            }
+        });
+
+        //Update
+        updateBtn.addActionListener(e -> {
+            int row = roomTable.getSelectedRow();
+
+            if (row >= 0) {
+                int modelRow = roomTable.convertRowIndexToModel(row);
+
+                String roomNo = JOptionPane.showInputDialog(frame, "Enter Room No:", tableModel.getValueAt(modelRow, 0));
+                String type = JOptionPane.showInputDialog(frame, "Enter Room Type:", tableModel.getValueAt(modelRow, 1));
+                String price = JOptionPane.showInputDialog(frame, "Enter Price:", tableModel.getValueAt(modelRow, 2));
+                String status = JOptionPane.showInputDialog(frame, "Enter Status:", tableModel.getValueAt(modelRow, 3));
+
+                tableModel.setValueAt(roomNo, modelRow, 0);
+                tableModel.setValueAt(type, modelRow, 1);
+                tableModel.setValueAt(price, modelRow, 2);
+                tableModel.setValueAt(status, modelRow, 3);
+
+            } else {
+                JOptionPane.showMessageDialog(frame, "Select a row first!");
+            }
+        });
+
+        //Delete
+        deleteBtn.addActionListener(e -> {
+            int row = roomTable.getSelectedRow();
+
+            if (row >= 0) {
+                int modelRow = roomTable.convertRowIndexToModel(row);
+                tableModel.removeRow(modelRow);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Select a row first!");
+            }
+        });
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    //Add helper
+    private void addRoom(String no, String type, String price, String status) {
+        tableModel.addRow(new Object[]{no, type, price, status});
+    }
+
+    // Filter method
+    private void filterTable(String query) {
+        if (query.trim().isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + query));
+        }
     }
 }
