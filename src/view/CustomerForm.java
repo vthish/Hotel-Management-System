@@ -13,50 +13,79 @@ public class CustomerForm {
 
         JFrame frame = new JFrame("Customer Form");
 
-        JTextField nameField = new JTextField("Enter Name");
-        JTextField phoneField = new JTextField("Enter Phone");
-        JTextField emailField = new JTextField("Enter Email");
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+
+        // Labels
+        JLabel nameLabel = new JLabel("Name");
+        JLabel phoneLabel = new JLabel("Phone");
+        JLabel emailLabel = new JLabel("Email");
+
+        // Fields with placeholder
+        JTextField nameField = new JTextField("Ex: John");
+        JTextField phoneField = new JTextField("Ex: 0771234567");
+        JTextField emailField = new JTextField("Ex: test@gmail.com");
 
         JButton saveButton = new JButton("Save");
 
-        nameField.setBounds(50, 50, 200, 30);
-        phoneField.setBounds(50, 90, 200, 30);
-        emailField.setBounds(50, 130, 200, 30);
-        saveButton.setBounds(50, 180, 100, 30);
+        // Positions
+        nameLabel.setBounds(50, 10, 200, 20);
+        nameField.setBounds(50, 30, 200, 30);
 
-        setPlaceholder(nameField, "Enter Name");
-        setPlaceholder(phoneField, "Enter Phone");
-        setPlaceholder(emailField, "Enter Email");
+        phoneLabel.setBounds(50, 70, 200, 20);
+        phoneField.setBounds(50, 90, 200, 30);
+
+        emailLabel.setBounds(50, 130, 200, 20);
+        emailField.setBounds(50, 150, 200, 30);
+
+        saveButton.setBounds(50, 200, 100, 30);
+
+        // Placeholder setup
+        addPlaceholder(nameField, "Ex: John");
+        addPlaceholder(phoneField, "Ex: 0771234567");
+        addPlaceholder(emailField, "Ex: test@gmail.com");
 
         CustomerController controller = new CustomerController();
 
+        // Enter navigation
         nameField.addActionListener(e -> phoneField.requestFocus());
         phoneField.addActionListener(e -> emailField.requestFocus());
         emailField.addActionListener(e -> saveButton.doClick());
 
+        // Save
         saveButton.addActionListener(e -> {
-            controller.saveCustomer(
-                    nameField.getText(),
-                    phoneField.getText(),
-                    emailField.getText()
-            );
+
+            String name = nameField.getText();
+            String phone = phoneField.getText();
+            String email = emailField.getText();
+
+            if (name.equals("Ex: John") || phone.equals("Ex: 0771234567") || email.equals("Ex: test@gmail.com")) {
+                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
+                return;
+            }
+
+            controller.saveCustomer(name, phone, email);
 
             JOptionPane.showMessageDialog(frame, "Saved Successfully");
             frame.dispose();
         });
 
+        // Add components
+        frame.add(nameLabel);
         frame.add(nameField);
+        frame.add(phoneLabel);
         frame.add(phoneField);
+        frame.add(emailLabel);
         frame.add(emailField);
         frame.add(saveButton);
 
         frame.setSize(300, 300);
-        frame.setLayout(null);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    private static void setPlaceholder(JTextField field, String text) {
+    private static void addPlaceholder(JTextField field, String text) {
         field.setForeground(Color.GRAY);
 
         field.addFocusListener(new FocusAdapter() {

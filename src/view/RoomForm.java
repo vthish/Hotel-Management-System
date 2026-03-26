@@ -13,56 +13,94 @@ public class RoomForm {
 
         JFrame frame = new JFrame("Room Form");
 
-        JTextField roomNumber = new JTextField("Enter Room Number");
-        JTextField type = new JTextField("Enter Room Type");
-        JTextField price = new JTextField("Enter Price");
-        JTextField status = new JTextField("Enter Status");
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+
+        // Labels
+        JLabel roomLabel = new JLabel("Room Number");
+        JLabel typeLabel = new JLabel("Type");
+        JLabel priceLabel = new JLabel("Price");
+        JLabel statusLabel = new JLabel("Status");
+
+        // Fields with placeholders
+        JTextField roomNumber = new JTextField("Ex: 101");
+        JTextField type = new JTextField("Ex: Deluxe");
+        JTextField price = new JTextField("Ex: 5000");
+
+        // Dropdown
+        String[] statuses = {"Available", "Booked", "Maintenance"};
+        JComboBox<String> status = new JComboBox<>(statuses);
 
         JButton saveBtn = new JButton("Save");
 
+        // Positions
+        roomLabel.setBounds(50, 10, 200, 20);
         roomNumber.setBounds(50, 30, 200, 30);
-        type.setBounds(50, 70, 200, 30);
-        price.setBounds(50, 110, 200, 30);
-        status.setBounds(50, 150, 200, 30);
-        saveBtn.setBounds(50, 200, 100, 30);
 
-        setPlaceholder(roomNumber, "Enter Room Number");
-        setPlaceholder(type, "Enter Room Type");
-        setPlaceholder(price, "Enter Price");
-        setPlaceholder(status, "Enter Status");
+        typeLabel.setBounds(50, 70, 200, 20);
+        type.setBounds(50, 90, 200, 30);
+
+        priceLabel.setBounds(50, 130, 200, 20);
+        price.setBounds(50, 150, 200, 30);
+
+        statusLabel.setBounds(50, 190, 200, 20);
+        status.setBounds(50, 210, 200, 30);
+
+        saveBtn.setBounds(50, 250, 100, 30);
+
+        // Placeholder setup
+        addPlaceholder(roomNumber, "Ex: 101");
+        addPlaceholder(type, "Ex: Deluxe");
+        addPlaceholder(price, "Ex: 5000");
 
         RoomController controller = new RoomController();
 
+        // Enter navigation
         roomNumber.addActionListener(e -> type.requestFocus());
         type.addActionListener(e -> price.requestFocus());
         price.addActionListener(e -> status.requestFocus());
-        status.addActionListener(e -> saveBtn.doClick());
 
+        // Save
         saveBtn.addActionListener(e -> {
+
+            String roomNo = roomNumber.getText();
+            String typeText = type.getText();
+            String priceText = price.getText();
+
+            if (roomNo.equals("Ex: 101") || typeText.equals("Ex: Deluxe") || priceText.equals("Ex: 5000")) {
+                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
+                return;
+            }
+
             controller.saveRoom(
-                    roomNumber.getText(),
-                    type.getText(),
-                    price.getText(),
-                    status.getText()
+                    roomNo,
+                    typeText,
+                    priceText,
+                    status.getSelectedItem().toString()
             );
 
             JOptionPane.showMessageDialog(frame, "Saved Successfully");
             frame.dispose();
         });
 
+        // Add
+        frame.add(roomLabel);
         frame.add(roomNumber);
+        frame.add(typeLabel);
         frame.add(type);
+        frame.add(priceLabel);
         frame.add(price);
+        frame.add(statusLabel);
         frame.add(status);
         frame.add(saveBtn);
 
-        frame.setSize(300, 300);
-        frame.setLayout(null);
+        frame.setSize(300, 330);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    private static void setPlaceholder(JTextField field, String text) {
+    private static void addPlaceholder(JTextField field, String text) {
         field.setForeground(Color.GRAY);
 
         field.addFocusListener(new FocusAdapter() {

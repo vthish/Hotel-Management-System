@@ -13,7 +13,7 @@ public class Dashboard {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
-        // Buttons
+        // ButtonsS
         JButton customerBtn = new JButton("Customer");
         JButton roomBtn = new JButton("Room");
         JButton bookingBtn = new JButton("Booking");

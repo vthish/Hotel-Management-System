@@ -1,11 +1,13 @@
 package view;
 
 import controller.BookingController;
+import com.toedter.calendar.JDateChooser;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.Date;
 
 public class BookingForm {
 
@@ -13,56 +15,92 @@ public class BookingForm {
 
         JFrame frame = new JFrame("Booking Form");
 
-        JTextField customerId = new JTextField("Enter Customer ID");
-        JTextField roomId = new JTextField("Enter Room ID");
-        JTextField checkIn = new JTextField("YYYY-MM-DD");
-        JTextField checkOut = new JTextField("YYYY-MM-DD");
+        frame.setLayout(null);
+        frame.setLocationRelativeTo(null);
+        frame.setResizable(false);
+
+        // Labels
+        JLabel customerLabel = new JLabel("Customer ID");
+        JLabel roomLabel = new JLabel("Room ID");
+        JLabel checkInLabel = new JLabel("Check In");
+        JLabel checkOutLabel = new JLabel("Check Out");
+
+        // Fields with placeholder
+        JTextField customerId = new JTextField("Ex: 1");
+        JTextField roomId = new JTextField("Ex: 101");
+
+        JDateChooser checkIn = new JDateChooser();
+        JDateChooser checkOut = new JDateChooser();
 
         JButton saveBtn = new JButton("Save");
 
+        // Positions
+        customerLabel.setBounds(50, 10, 200, 20);
         customerId.setBounds(50, 30, 200, 30);
-        roomId.setBounds(50, 70, 200, 30);
-        checkIn.setBounds(50, 110, 200, 30);
-        checkOut.setBounds(50, 150, 200, 30);
-        saveBtn.setBounds(50, 200, 100, 30);
 
-        setPlaceholder(customerId, "Enter Customer ID");
-        setPlaceholder(roomId, "Enter Room ID");
-        setPlaceholder(checkIn, "YYYY-MM-DD");
-        setPlaceholder(checkOut, "YYYY-MM-DD");
+        roomLabel.setBounds(50, 70, 200, 20);
+        roomId.setBounds(50, 90, 200, 30);
+
+        checkInLabel.setBounds(50, 130, 200, 20);
+        checkIn.setBounds(50, 150, 200, 30);
+
+        checkOutLabel.setBounds(50, 190, 200, 20);
+        checkOut.setBounds(50, 210, 200, 30);
+
+        saveBtn.setBounds(50, 250, 100, 30);
+
+        // Placeholder setup
+        addPlaceholder(customerId, "Ex: 1");
+        addPlaceholder(roomId, "Ex: 101");
 
         BookingController controller = new BookingController();
 
+        // Enter navigation
         customerId.addActionListener(e -> roomId.requestFocus());
         roomId.addActionListener(e -> checkIn.requestFocus());
-        checkIn.addActionListener(e -> checkOut.requestFocus());
-        checkOut.addActionListener(e -> saveBtn.doClick());
 
+        // Save
         saveBtn.addActionListener(e -> {
+
+            Date inDate = checkIn.getDate();
+            Date outDate = checkOut.getDate();
+
+            if (customerId.getText().equals("Ex: 1") ||
+                    roomId.getText().equals("Ex: 101") ||
+                    inDate == null || outDate == null) {
+
+                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
+                return;
+            }
+
             controller.saveBooking(
                     customerId.getText(),
                     roomId.getText(),
-                    checkIn.getText(),
-                    checkOut.getText()
+                    new java.sql.Date(inDate.getTime()).toString(),
+                    new java.sql.Date(outDate.getTime()).toString()
             );
 
             JOptionPane.showMessageDialog(frame, "Booking Saved");
             frame.dispose();
         });
 
+        // Add components
+        frame.add(customerLabel);
         frame.add(customerId);
+        frame.add(roomLabel);
         frame.add(roomId);
+        frame.add(checkInLabel);
         frame.add(checkIn);
+        frame.add(checkOutLabel);
         frame.add(checkOut);
         frame.add(saveBtn);
 
-        frame.setSize(300, 300);
-        frame.setLayout(null);
+        frame.setSize(300, 350);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    private static void setPlaceholder(JTextField field, String text) {
+    private static void addPlaceholder(JTextField field, String text) {
         field.setForeground(Color.GRAY);
 
         field.addFocusListener(new FocusAdapter() {
