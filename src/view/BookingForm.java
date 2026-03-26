@@ -1,6 +1,8 @@
 package view;
 
 import controller.BookingController;
+import controller.CustomerController;
+import controller.RoomController;
 import com.toedter.calendar.JDateChooser;
 
 import javax.swing.*;
@@ -8,88 +10,67 @@ import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.Date;
+import java.util.List;
 
 public class BookingForm {
 
-    public static void main(String[] args) {
+    private JFrame frame;
+    private JComboBox<String> customerCombo;
+    private JComboBox<String> roomCombo;
+    private JDateChooser checkIn;
+    private JDateChooser checkOut;
 
-        JFrame frame = new JFrame("Booking Form");
+    private CustomerController customerController;
+    private RoomController roomController;
+    private BookingController bookingController;
 
+    public BookingForm() {
+        customerController = new CustomerController();
+        roomController = new RoomController();
+        bookingController = new BookingController();
+        createAndShowGUI();
+    }
+
+    private void createAndShowGUI() {
+        frame = new JFrame("Booking Form");
         frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
+        frame.setSize(350, 400);
         frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
 
-        JLabel customerLabel = new JLabel("Customer ID");
-        JLabel roomLabel = new JLabel("Room ID");
-        JLabel checkInLabel = new JLabel("Check In");
-        JLabel checkOutLabel = new JLabel("Check Out");
+        JLabel customerLabel = new JLabel("Customer:");
+        JLabel roomLabel = new JLabel("Room:");
+        JLabel checkInLabel = new JLabel("Check-In:");
+        JLabel checkOutLabel = new JLabel("Check-Out:");
 
-        JTextField customerId = new JTextField("Ex: 1");
-        JTextField roomId = new JTextField("Ex: 101");
+        customerCombo = new JComboBox<>();
+        roomCombo = new JComboBox<>();
 
-        JDateChooser checkIn = new JDateChooser();
-        JDateChooser checkOut = new JDateChooser();
+        checkIn = new JDateChooser();
+        checkOut = new JDateChooser();
 
         JButton saveBtn = new JButton("Save");
         JButton backBtn = new JButton("Back");
 
-        customerLabel.setBounds(50, 10, 200, 20);
-        customerId.setBounds(50, 30, 200, 30);
+        customerLabel.setBounds(30, 20, 100, 20);
+        customerCombo.setBounds(130, 20, 180, 25);
 
-        roomLabel.setBounds(50, 70, 200, 20);
-        roomId.setBounds(50, 90, 200, 30);
+        roomLabel.setBounds(30, 60, 100, 20);
+        roomCombo.setBounds(130, 60, 180, 25);
 
-        checkInLabel.setBounds(50, 130, 200, 20);
-        checkIn.setBounds(50, 150, 200, 30);
+        checkInLabel.setBounds(30, 100, 100, 20);
+        checkIn.setBounds(130, 100, 180, 25);
 
-        checkOutLabel.setBounds(50, 190, 200, 20);
-        checkOut.setBounds(50, 210, 200, 30);
+        checkOutLabel.setBounds(30, 140, 100, 20);
+        checkOut.setBounds(130, 140, 180, 25);
 
-        saveBtn.setBounds(50, 260, 100, 30);
-        backBtn.setBounds(160, 260, 90, 30); // FIXED POSITION
-
-        addPlaceholder(customerId, "Ex: 1");
-        addPlaceholder(roomId, "Ex: 101");
-
-        BookingController controller = new BookingController();
-
-        customerId.addActionListener(e -> roomId.requestFocus());
-        roomId.addActionListener(e -> checkIn.requestFocus());
-
-        saveBtn.addActionListener(e -> {
-
-            Date inDate = checkIn.getDate();
-            Date outDate = checkOut.getDate();
-
-            if (customerId.getText().equals("Ex: 1") ||
-                    roomId.getText().equals("Ex: 101") ||
-                    inDate == null || outDate == null) {
-
-                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
-                return;
-            }
-
-            controller.saveBooking(
-                    customerId.getText(),
-                    roomId.getText(),
-                    new java.sql.Date(inDate.getTime()).toString(),
-                    new java.sql.Date(outDate.getTime()).toString()
-            );
-
-            JOptionPane.showMessageDialog(frame, "Booking Saved");
-            frame.dispose();
-        });
-
-        // BACK BUTTON FIX
-        backBtn.addActionListener(e -> {
-            frame.dispose();
-            Dashboard.main(null);
-        });
+        saveBtn.setBounds(50, 200, 100, 30);
+        backBtn.setBounds(180, 200, 100, 30);
 
         frame.add(customerLabel);
-        frame.add(customerId);
+        frame.add(customerCombo);
         frame.add(roomLabel);
-        frame.add(roomId);
+        frame.add(roomCombo);
         frame.add(checkInLabel);
         frame.add(checkIn);
         frame.add(checkOutLabel);
@@ -97,28 +78,80 @@ public class BookingForm {
         frame.add(saveBtn);
         frame.add(backBtn);
 
-        frame.setSize(300, 350);
-        frame.setVisible(true);
+        populateCustomers();
+        populateAvailableRooms();
+
+        // Set check-in min date as today
+        checkIn.setMinSelectableDate(new Date());
+
+        // Save button action
+        saveBtn.addActionListener(e -> saveBooking());
+
+        // Back button
+        backBtn.addActionListener(e -> {
+            frame.dispose();
+            Dashboard.main(null);
+        });
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
-    private static void addPlaceholder(JTextField field, String text) {
-        field.setForeground(Color.GRAY);
+    private void populateCustomers() {
+        customerCombo.removeAllItems();
+        List<String[]> customers = customerController.getCustomers();
+        for (String[] c : customers) {
+            // Format: ID - Name
+            customerCombo.addItem(c[0] + " - " + c[1]);
+        }
+    }
 
-        field.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (field.getText().equals(text)) {
-                    field.setText("");
-                    field.setForeground(Color.BLACK);
-                }
+    private void populateAvailableRooms() {
+        roomCombo.removeAllItems();
+        List<String[]> rooms = roomController.getRooms();
+        for (String[] r : rooms) {
+            if (r[3].equalsIgnoreCase("Available")) {
+                // Format: RoomNo - Type
+                roomCombo.addItem(r[0] + " - " + r[1]);
             }
+        }
+    }
 
-            public void focusLost(FocusEvent e) {
-                if (field.getText().isEmpty()) {
-                    field.setText(text);
-                    field.setForeground(Color.GRAY);
-                }
-            }
-        });
+    private void saveBooking() {
+        if (customerCombo.getItemCount() == 0 || roomCombo.getItemCount() == 0) {
+            JOptionPane.showMessageDialog(frame, "No customer or room available!");
+            return;
+        }
+
+        String custItem = (String) customerCombo.getSelectedItem();
+        String customerId = custItem.split(" - ")[0];
+
+        String roomItem = (String) roomCombo.getSelectedItem();
+        String roomId = roomItem.split(" - ")[0];
+
+        Date inDate = checkIn.getDate();
+        Date outDate = checkOut.getDate();
+
+        if (inDate == null || outDate == null || inDate.after(outDate)) {
+            JOptionPane.showMessageDialog(frame, "Select valid check-in and check-out dates!");
+            return;
+        }
+
+        // Save booking
+        bookingController.saveBooking(customerId, roomId,
+                new java.sql.Date(inDate.getTime()).toString(),
+                new java.sql.Date(outDate.getTime()).toString());
+
+        // Update room status
+        roomController.updateRoomStatus(roomId, "Occupied");
+
+        JOptionPane.showMessageDialog(frame, "Booking saved successfully!");
+
+        // Refresh room combo to remove occupied room
+        populateAvailableRooms();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(BookingForm::new);
     }
 }
