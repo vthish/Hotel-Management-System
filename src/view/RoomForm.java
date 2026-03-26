@@ -33,6 +33,7 @@ public class RoomForm {
         JComboBox<String> status = new JComboBox<>(statuses);
 
         JButton saveBtn = new JButton("Save");
+        JButton backBtn = new JButton("Back");
 
         // Positions
         roomLabel.setBounds(50, 10, 200, 20);
@@ -47,7 +48,8 @@ public class RoomForm {
         statusLabel.setBounds(50, 190, 200, 20);
         status.setBounds(50, 210, 200, 30);
 
-        saveBtn.setBounds(50, 250, 100, 30);
+        saveBtn.setBounds(50, 260, 100, 30);
+        backBtn.setBounds(160, 260, 90, 30); // FIXED POSITION
 
         // Placeholder setup
         addPlaceholder(roomNumber, "Ex: 101");
@@ -84,7 +86,13 @@ public class RoomForm {
             frame.dispose();
         });
 
-        // Add
+        // BACK BUTTON
+        backBtn.addActionListener(e -> {
+            frame.dispose();
+            Dashboard.main(null);
+        });
+
+        // Add components
         frame.add(roomLabel);
         frame.add(roomNumber);
         frame.add(typeLabel);
@@ -94,8 +102,9 @@ public class RoomForm {
         frame.add(statusLabel);
         frame.add(status);
         frame.add(saveBtn);
+        frame.add(backBtn);
 
-        frame.setSize(300, 330);
+        frame.setSize(300, 350); // little height increase
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }

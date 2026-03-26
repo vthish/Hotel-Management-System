@@ -17,19 +17,17 @@ public class CustomerForm {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
-        // Labels
         JLabel nameLabel = new JLabel("Name");
         JLabel phoneLabel = new JLabel("Phone");
         JLabel emailLabel = new JLabel("Email");
 
-        // Fields with placeholder
         JTextField nameField = new JTextField("Ex: John");
         JTextField phoneField = new JTextField("Ex: 0771234567");
         JTextField emailField = new JTextField("Ex: test@gmail.com");
 
         JButton saveButton = new JButton("Save");
+        JButton backBtn = new JButton("Back");
 
-        // Positions
         nameLabel.setBounds(50, 10, 200, 20);
         nameField.setBounds(50, 30, 200, 30);
 
@@ -40,38 +38,43 @@ public class CustomerForm {
         emailField.setBounds(50, 150, 200, 30);
 
         saveButton.setBounds(50, 200, 100, 30);
+        backBtn.setBounds(160, 200, 90, 30);
 
-        // Placeholder setup
         addPlaceholder(nameField, "Ex: John");
         addPlaceholder(phoneField, "Ex: 0771234567");
         addPlaceholder(emailField, "Ex: test@gmail.com");
 
         CustomerController controller = new CustomerController();
 
-        // Enter navigation
         nameField.addActionListener(e -> phoneField.requestFocus());
         phoneField.addActionListener(e -> emailField.requestFocus());
         emailField.addActionListener(e -> saveButton.doClick());
 
-        // Save
         saveButton.addActionListener(e -> {
 
-            String name = nameField.getText();
-            String phone = phoneField.getText();
-            String email = emailField.getText();
+            if (nameField.getText().equals("Ex: John") ||
+                    phoneField.getText().equals("Ex: 0771234567") ||
+                    emailField.getText().equals("Ex: test@gmail.com")) {
 
-            if (name.equals("Ex: John") || phone.equals("Ex: 0771234567") || email.equals("Ex: test@gmail.com")) {
                 JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
                 return;
             }
 
-            controller.saveCustomer(name, phone, email);
+            controller.saveCustomer(
+                    nameField.getText(),
+                    phoneField.getText(),
+                    emailField.getText()
+            );
 
             JOptionPane.showMessageDialog(frame, "Saved Successfully");
             frame.dispose();
         });
 
-        // Add components
+        backBtn.addActionListener(e -> {
+            frame.dispose();
+            Dashboard.main(null);
+        });
+
         frame.add(nameLabel);
         frame.add(nameField);
         frame.add(phoneLabel);
@@ -79,6 +82,7 @@ public class CustomerForm {
         frame.add(emailLabel);
         frame.add(emailField);
         frame.add(saveButton);
+        frame.add(backBtn);
 
         frame.setSize(300, 300);
         frame.setVisible(true);

@@ -19,13 +19,11 @@ public class BookingForm {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
-        // Labels
         JLabel customerLabel = new JLabel("Customer ID");
         JLabel roomLabel = new JLabel("Room ID");
         JLabel checkInLabel = new JLabel("Check In");
         JLabel checkOutLabel = new JLabel("Check Out");
 
-        // Fields with placeholder
         JTextField customerId = new JTextField("Ex: 1");
         JTextField roomId = new JTextField("Ex: 101");
 
@@ -33,8 +31,8 @@ public class BookingForm {
         JDateChooser checkOut = new JDateChooser();
 
         JButton saveBtn = new JButton("Save");
+        JButton backBtn = new JButton("Back");
 
-        // Positions
         customerLabel.setBounds(50, 10, 200, 20);
         customerId.setBounds(50, 30, 200, 30);
 
@@ -47,19 +45,17 @@ public class BookingForm {
         checkOutLabel.setBounds(50, 190, 200, 20);
         checkOut.setBounds(50, 210, 200, 30);
 
-        saveBtn.setBounds(50, 250, 100, 30);
+        saveBtn.setBounds(50, 260, 100, 30);
+        backBtn.setBounds(160, 260, 90, 30); // FIXED POSITION
 
-        // Placeholder setup
         addPlaceholder(customerId, "Ex: 1");
         addPlaceholder(roomId, "Ex: 101");
 
         BookingController controller = new BookingController();
 
-        // Enter navigation
         customerId.addActionListener(e -> roomId.requestFocus());
         roomId.addActionListener(e -> checkIn.requestFocus());
 
-        // Save
         saveBtn.addActionListener(e -> {
 
             Date inDate = checkIn.getDate();
@@ -84,7 +80,12 @@ public class BookingForm {
             frame.dispose();
         });
 
-        // Add components
+        // BACK BUTTON FIX
+        backBtn.addActionListener(e -> {
+            frame.dispose();
+            Dashboard.main(null);
+        });
+
         frame.add(customerLabel);
         frame.add(customerId);
         frame.add(roomLabel);
@@ -94,6 +95,7 @@ public class BookingForm {
         frame.add(checkOutLabel);
         frame.add(checkOut);
         frame.add(saveBtn);
+        frame.add(backBtn);
 
         frame.setSize(300, 350);
         frame.setVisible(true);

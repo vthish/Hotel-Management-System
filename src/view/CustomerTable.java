@@ -19,23 +19,30 @@ public class CustomerTable {
         String[] columns = {"ID", "Name", "Phone", "Email"};
 
         DefaultTableModel model = new DefaultTableModel(columns, 0);
-
         JTable table = new JTable(model);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBounds(20, 20, 450, 200);
 
-        CustomerController controller = new CustomerController();
+        JButton backBtn = new JButton("Back");
+        backBtn.setBounds(200, 230, 100, 30);
 
+        CustomerController controller = new CustomerController();
         List<String[]> data = controller.getCustomers();
 
         for (String[] row : data) {
             model.addRow(row);
         }
 
-        frame.add(scrollPane);
+        backBtn.addActionListener(e -> {
+            frame.dispose();
+            Dashboard.main(null);
+        });
 
-        frame.setSize(500, 300);
+        frame.add(scrollPane);
+        frame.add(backBtn);
+
+        frame.setSize(500, 320);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
