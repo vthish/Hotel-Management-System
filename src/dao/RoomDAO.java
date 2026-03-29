@@ -12,14 +12,11 @@ public class RoomDAO {
     public boolean addRoom(String roomNumber, String type, double price, String status) {
         try {
             Connection con = DBConnection.getConnection();
-
             String checkSql = "SELECT * FROM room WHERE room_number=?";
             PreparedStatement checkPs = con.prepareStatement(checkSql);
             checkPs.setString(1, roomNumber);
             ResultSet rs = checkPs.executeQuery();
-            if(rs.next()) {
-                return false;
-            }
+            if(rs.next()) return false;
 
             String sql = "INSERT INTO room(room_number, type, price, status) VALUES (?, ?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(sql);
@@ -28,9 +25,7 @@ public class RoomDAO {
             ps.setDouble(3, price);
             ps.setString(4, status);
             ps.executeUpdate();
-
             return true;
-
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -44,7 +39,6 @@ public class RoomDAO {
             String sql = "SELECT id, room_number, type, price FROM room WHERE status='Available'";
             PreparedStatement ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 String[] row = {
                         rs.getString("id"),
@@ -59,6 +53,22 @@ public class RoomDAO {
         return list;
     }
 
+    public int getAvailableRoomCount() {
+        int count = 0;
+        try {
+            Connection con = DBConnection.getConnection();
+            String sql = "SELECT COUNT(*) AS total FROM room WHERE status='Available'";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("total");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return count;
+    }
+
     public List<String[]> getAllRooms() {
         List<String[]> list = new ArrayList<>();
         try {
@@ -66,14 +76,8 @@ public class RoomDAO {
             String sql = "SELECT room_number, type, price, status FROM room";
             PreparedStatement ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
-                String[] row = {
-                        rs.getString("room_number"),
-                        rs.getString("type"),
-                        rs.getString("price"),
-                        rs.getString("status")
-                };
+                String[] row = {rs.getString("room_number"), rs.getString("type"), rs.getString("price"), rs.getString("status")};
                 list.add(row);
             }
         } catch (Exception e) {

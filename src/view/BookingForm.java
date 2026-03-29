@@ -14,13 +14,12 @@ import java.util.List;
 public class BookingForm {
 
     public static void main(String[] args) {
-
         JFrame frame = new JFrame("Add Booking");
         frame.setLayout(null);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
 
-        JLabel customerLabel = new JLabel("Select Customer");
+        JLabel customerLabel = new JLabel("Select Customer (Name - Phone)");
         JLabel roomLabel = new JLabel("Select Available Room");
         JLabel checkInLabel = new JLabel("Check-In Date");
         JLabel checkOutLabel = new JLabel("Check-Out Date");
@@ -54,9 +53,10 @@ public class BookingForm {
         RoomController roomController = new RoomController();
         BookingController bookingController = new BookingController();
 
+        // Showing Phone Number in Dropdown
         List<String[]> customers = customerController.getCustomers();
         for (String[] customer : customers) {
-            customerDropdown.addItem(new ComboItem(customer[0], customer[1], 0));
+            customerDropdown.addItem(new ComboItem(customer[0], customer[1] + " (" + customer[2] + ")", 0));
         }
 
         List<String[]> rooms = roomController.getAvailableRooms();
@@ -70,64 +70,41 @@ public class BookingForm {
             ComboItem selectedRoom = (ComboItem) roomDropdown.getSelectedItem();
 
             if (checkInChooser.getDate() == null || checkOutChooser.getDate() == null) {
-                JOptionPane.showMessageDialog(frame, "Please select both Check-In and Check-Out dates!", "Validation Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            if (selectedCustomer == null || selectedRoom == null) {
-                JOptionPane.showMessageDialog(frame, "Please ensure Customers and Rooms are available!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Please select dates!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             Date inDate = checkInChooser.getDate();
             Date outDate = checkOutChooser.getDate();
-
             if (outDate.before(inDate) || outDate.equals(inDate)) {
-                JOptionPane.showMessageDialog(frame, "Check-Out date must be strictly after Check-In date!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Check-Out must be after Check-In!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            long differenceInMilliSeconds = Math.abs(outDate.getTime() - inDate.getTime());
-            long totalDays = differenceInMilliSeconds / (24 * 60 * 60 * 1000);
+            long diff = Math.abs(outDate.getTime() - inDate.getTime());
+            long totalDays = diff / (24 * 60 * 60 * 1000);
+            double totalAmount = selectedRoom.getPrice() * totalDays;
 
-            double roomPrice = selectedRoom.getPrice();
-            double totalAmount = roomPrice * totalDays;
-
-            String customerId = selectedCustomer.getId();
-            String roomId = selectedRoom.getId();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String checkIn = sdf.format(inDate);
-            String checkOut = sdf.format(outDate);
+            String res = bookingController.saveBooking(selectedCustomer.getId(), selectedRoom.getId(), sdf.format(inDate), sdf.format(outDate));
 
-            String result = bookingController.saveBooking(customerId, roomId, checkIn, checkOut);
-
-            if (result.equals("Booking successful!")) {
-                JOptionPane.showMessageDialog(frame, result, "Success", JOptionPane.INFORMATION_MESSAGE);
-
-                new BillView(selectedCustomer.getDisplayValue(), selectedRoom.getDisplayValue(), checkIn, checkOut, totalDays, totalAmount);
-
+            if (res.equals("Booking successful!")) {
+                JOptionPane.showMessageDialog(frame, res);
+                new BillView(selectedCustomer.getDisplayValue(), selectedRoom.getDisplayValue(), sdf.format(inDate), sdf.format(outDate), totalDays, totalAmount);
                 frame.dispose();
                 Dashboard.main(null);
             } else {
-                JOptionPane.showMessageDialog(frame, result, "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, res, "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        backBtn.addActionListener(e -> {
-            frame.dispose();
-            Dashboard.main(null);
-        });
+        backBtn.addActionListener(e -> { frame.dispose(); Dashboard.main(null); });
 
-        frame.add(customerLabel);
-        frame.add(customerDropdown);
-        frame.add(roomLabel);
-        frame.add(roomDropdown);
-        frame.add(checkInLabel);
-        frame.add(checkInChooser);
-        frame.add(checkOutLabel);
-        frame.add(checkOutChooser);
-        frame.add(saveButton);
-        frame.add(backBtn);
+        frame.add(customerLabel); frame.add(customerDropdown);
+        frame.add(roomLabel); frame.add(roomDropdown);
+        frame.add(checkInLabel); frame.add(checkInChooser);
+        frame.add(checkOutLabel); frame.add(checkOutChooser);
+        frame.add(saveButton); frame.add(backBtn);
 
         frame.setSize(370, 360);
         frame.setVisible(true);
