@@ -1,6 +1,6 @@
 package dao;
 
-import dao.DBConnection;
+import db.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,8 @@ import java.util.List;
 public class CustomerDAO {
 
     public void addCustomer(String name, String phone, String email) {
-
         try {
             Connection con = DBConnection.getConnection();
-
             String sql = "INSERT INTO customer(name, phone, email) VALUES (?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(sql);
 
@@ -20,18 +18,15 @@ public class CustomerDAO {
             ps.setString(3, email);
 
             ps.executeUpdate();
-
             System.out.println("Customer added successfully");
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    // GET ALL CUSTOMERS
+
     public List<String[]> getAllCustomers() {
-
         List<String[]> list = new ArrayList<>();
-
         try {
             Connection con = DBConnection.getConnection();
             String sql = "SELECT * FROM customer";
@@ -47,18 +42,13 @@ public class CustomerDAO {
                 };
                 list.add(row);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return list;
     }
 
-
-    // UPDATE CUSTOMER
     public void updateCustomer(String id, String name, String phone, String email) {
-
         try {
             Connection con = DBConnection.getConnection();
             String sql = "UPDATE customer SET name=?, phone=?, email=? WHERE id=?";
@@ -76,10 +66,7 @@ public class CustomerDAO {
         }
     }
 
-
-    // DELETE CUSTOMER
     public void deleteCustomer(String id) {
-
         try {
             Connection con = DBConnection.getConnection();
             String sql = "DELETE FROM customer WHERE id=?";

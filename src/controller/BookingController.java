@@ -7,7 +7,14 @@ public class BookingController {
 
     private BookingDAO dao = new BookingDAO();
 
-    public void saveBooking(String customerIdText, String roomIdText, String checkInText, String checkOutText) {
+    public String saveBooking(String customerIdText, String roomIdText, String checkInText, String checkOutText) {
+
+        if (customerIdText == null || customerIdText.trim().isEmpty() ||
+                roomIdText == null || roomIdText.trim().isEmpty() ||
+                checkInText == null || checkInText.trim().isEmpty() ||
+                checkOutText == null || checkOutText.trim().isEmpty()) {
+            return "All fields are required!";
+        }
 
         int customerId;
         int roomId;
@@ -16,18 +23,27 @@ public class BookingController {
             customerId = Integer.parseInt(customerIdText);
             roomId = Integer.parseInt(roomIdText);
         } catch (Exception e) {
-            System.out.println("Invalid IDs");
-            return;
+            return "Invalid Customer or Room Selection.";
         }
 
         try {
             Date checkIn = Date.valueOf(checkInText);
             Date checkOut = Date.valueOf(checkOutText);
 
-            dao.addBooking(customerId, roomId, checkIn, checkOut);
+            if (checkOut.before(checkIn) || checkOut.equals(checkIn)) {
+                return "Check-out date must be after Check-in date!";
+            }
 
-        } catch (Exception e) {
-            System.out.println("Invalid date format (use YYYY-MM-DD)");
+            boolean isSaved = dao.addBooking(customerId, roomId, checkIn, checkOut);
+
+            if(isSaved) {
+                return "Booking successful!";
+            } else {
+                return "Failed to save booking. Please try again.";
+            }
+
+        } catch (IllegalArgumentException e) {
+            return "Invalid date format. Use YYYY-MM-DD.";
         }
     }
 }

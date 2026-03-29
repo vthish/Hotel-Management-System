@@ -1,32 +1,54 @@
 package controller;
 
-import javax.swing.table.DefaultTableModel;
+import dao.RoomDAO;
 import java.util.List;
-import java.util.ArrayList;
 
 public class RoomController {
 
-    // Example room list
-    private List<String[]> rooms = new ArrayList<>();
+    private RoomDAO roomDAO = new RoomDAO();
 
-    public RoomController() {
-        // dummy data
-        rooms.add(new String[]{"101", "Single", "1000", "Available"});
-        rooms.add(new String[]{"102", "Double", "1500", "Occupied"});
-        rooms.add(new String[]{"103", "Suite", "2500", "Available"});
-    }
-
-    public List<String[]> getRooms() {
-        return rooms;
-    }
-
-    // method to update status
-    public void updateRoomStatus(String roomId, String status) {
-        for (String[] room : rooms) {
-            if (room[0].equals(roomId)) {
-                room[3] = status; // 3rd index = Status
-                break;
-            }
+    public String saveRoom(String roomNumber, String type, String priceText, String status) {
+        if (roomNumber == null || roomNumber.trim().isEmpty() ||
+                type == null || type.trim().isEmpty() ||
+                priceText == null || priceText.trim().isEmpty()) {
+            return "All fields are required!";
         }
+
+        try {
+            double price = Double.parseDouble(priceText);
+            if (price <= 0) {
+                return "Price must be greater than zero.";
+            }
+
+            boolean isAdded = roomDAO.addRoom(roomNumber, type, price, status);
+            if (isAdded) {
+                return "Room added successfully!";
+            } else {
+                return "Room number already exists!";
+            }
+        } catch (NumberFormatException e) {
+            return "Invalid price format. Please enter a valid number.";
+        }
+    }
+
+    public List<String[]> getAvailableRooms() {
+        return roomDAO.getAvailableRooms();
+    }
+
+    public List<String[]> getAllRooms() {
+        return roomDAO.getAllRooms();
+    }
+
+    public void updateRoom(String roomNumber, String type, String priceText, String status) {
+        try {
+            double price = Double.parseDouble(priceText);
+            roomDAO.updateRoomData(roomNumber, type, price, status);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid price format for update.");
+        }
+    }
+
+    public void deleteRoom(String roomNumber) {
+        roomDAO.deleteRoom(roomNumber);
     }
 }

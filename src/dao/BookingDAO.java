@@ -1,14 +1,15 @@
 package dao;
 
-import dao.DBConnection;
+import db.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Date;
 
 public class BookingDAO {
 
-    public void addBooking(int customerId, int roomId, Date checkIn, Date checkOut) {
+    private RoomDAO roomDAO = new RoomDAO();
 
+    public boolean addBooking(int customerId, int roomId, Date checkIn, Date checkOut) {
         try {
             Connection con = DBConnection.getConnection();
 
@@ -20,12 +21,16 @@ public class BookingDAO {
             ps.setDate(3, checkIn);
             ps.setDate(4, checkOut);
 
-            ps.executeUpdate();
+            int result = ps.executeUpdate();
 
-            System.out.println("Booking added");
+            if (result > 0) {
+                roomDAO.updateRoomStatus(roomId, "Occupied");
+                return true;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return false;
     }
 }

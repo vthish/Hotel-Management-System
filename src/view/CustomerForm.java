@@ -12,13 +12,12 @@ public class CustomerForm {
     public static void main(String[] args) {
 
         JFrame frame = new JFrame("Customer Form");
-
         frame.setLayout(null);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 
         JLabel nameLabel = new JLabel("Name");
-        JLabel phoneLabel = new JLabel("Phone");
+        JLabel phoneLabel = new JLabel("Phone (10 digits, starts with 0)");
         JLabel emailLabel = new JLabel("Email");
 
         JTextField nameField = new JTextField("Ex: John");
@@ -28,17 +27,17 @@ public class CustomerForm {
         JButton saveButton = new JButton("Save");
         JButton backBtn = new JButton("Back");
 
-        nameLabel.setBounds(50, 10, 200, 20);
-        nameField.setBounds(50, 30, 200, 30);
+        nameLabel.setBounds(50, 10, 250, 20);
+        nameField.setBounds(50, 30, 250, 30);
 
-        phoneLabel.setBounds(50, 70, 200, 20);
-        phoneField.setBounds(50, 90, 200, 30);
+        phoneLabel.setBounds(50, 70, 250, 20);
+        phoneField.setBounds(50, 90, 250, 30);
 
-        emailLabel.setBounds(50, 130, 200, 20);
-        emailField.setBounds(50, 150, 200, 30);
+        emailLabel.setBounds(50, 130, 250, 20);
+        emailField.setBounds(50, 150, 250, 30);
 
-        saveButton.setBounds(50, 200, 100, 30);
-        backBtn.setBounds(160, 200, 90, 30);
+        saveButton.setBounds(50, 200, 120, 30);
+        backBtn.setBounds(180, 200, 120, 30);
 
         addPlaceholder(nameField, "Ex: John");
         addPlaceholder(phoneField, "Ex: 0771234567");
@@ -51,23 +50,19 @@ public class CustomerForm {
         emailField.addActionListener(e -> saveButton.doClick());
 
         saveButton.addActionListener(e -> {
+            String name = nameField.getText().equals("Ex: John") ? "" : nameField.getText();
+            String phone = phoneField.getText().equals("Ex: 0771234567") ? "" : phoneField.getText();
+            String email = emailField.getText().equals("Ex: test@gmail.com") ? "" : emailField.getText();
 
-            if (nameField.getText().equals("Ex: John") ||
-                    phoneField.getText().equals("Ex: 0771234567") ||
-                    emailField.getText().equals("Ex: test@gmail.com")) {
+            String result = controller.saveCustomer(name, phone, email);
 
-                JOptionPane.showMessageDialog(frame, "Fill all fields correctly");
-                return;
+            if (result.equals("Customer added successfully!")) {
+                JOptionPane.showMessageDialog(frame, result, "Success", JOptionPane.INFORMATION_MESSAGE);
+                frame.dispose();
+                CustomerTable.main(null);
+            } else {
+                JOptionPane.showMessageDialog(frame, result, "Validation Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            controller.saveCustomer(
-                    nameField.getText(),
-                    phoneField.getText(),
-                    emailField.getText()
-            );
-
-            JOptionPane.showMessageDialog(frame, "Saved Successfully");
-            frame.dispose();
         });
 
         backBtn.addActionListener(e -> {
@@ -84,14 +79,13 @@ public class CustomerForm {
         frame.add(saveButton);
         frame.add(backBtn);
 
-        frame.setSize(300, 300);
+        frame.setSize(360, 300);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private static void addPlaceholder(JTextField field, String text) {
         field.setForeground(Color.GRAY);
-
         field.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
                 if (field.getText().equals(text)) {
@@ -99,7 +93,6 @@ public class CustomerForm {
                     field.setForeground(Color.BLACK);
                 }
             }
-
             public void focusLost(FocusEvent e) {
                 if (field.getText().isEmpty()) {
                     field.setText(text);
